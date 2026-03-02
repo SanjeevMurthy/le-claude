@@ -1,0 +1,28 @@
+# Claude Code local settings
+.claude/settings.local.json
+.claude/worktrees/
+
+# macOS
+.DS_Store
+._*
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Environment and secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Node (if any tooling is added)
+node_modules/
+
+data/
+todo-skills/
+initialize.md
+prompt.txt
