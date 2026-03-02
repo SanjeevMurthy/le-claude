@@ -828,7 +828,7 @@ After both agents report, I'll synthesize their feedback into improvements.
 
 **Component diagram prompt:**
 
-```
+````
 Based on the architecture discussion, create a Mermaid component diagram
 showing:
 
@@ -860,7 +860,7 @@ graph TB
     SVC --> DB
     SVC --> CACHE
 ```
-```
+````
 
 **Technology Decision Record (TDR) prompt:**
 
@@ -891,7 +891,7 @@ Technology Decision Record:
 
 **`docs/architecture.md`** — Contains:
 
-```markdown
+````markdown
 # <Project Name> — Architecture
 
 ## System Overview
@@ -961,7 +961,7 @@ graph TB
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
 | ... | ... | ... | ... |
-```
+````
 
 ### Exit Criteria
 
@@ -1092,7 +1092,7 @@ Use these PostgreSQL conventions:
 
 **API contracts prompt (OpenAPI 3.0):**
 
-```
+````
 Design the complete API contract for <application>.
 
 Read @docs/database-schema.md for the data model.
@@ -1134,11 +1134,11 @@ paths:
       summary: Delete resource
       ...
 ```
-```
+````
 
 **Sequence diagram prompt:**
 
-```
+````
 Create sequence diagrams for these API flows:
 
 Read @docs/api-contracts.md for endpoint definitions.
@@ -1174,11 +1174,11 @@ sequenceDiagram
     API-->>FE: 200 { token, user }
     FE-->>User: Redirect to dashboard
 ```
-```
+````
 
 **Frontend component hierarchy prompt:**
 
-```
+````
 Design the frontend component hierarchy for <application>.
 
 Read @docs/api-contracts.md for all data shapes.
@@ -1213,7 +1213,7 @@ app/
     ├── forms/              # Form components
     └── layouts/            # Layout components
 ```
-```
+````
 
 **Error handling strategy prompt:**
 
@@ -1347,7 +1347,7 @@ The MASTER-PLAN.md is approved. Now:
 
 ### MASTER-PLAN.md Structure
 
-```markdown
+````markdown
 # <Project Name> — Master Implementation Plan
 
 > **Generated:** <timestamp>
@@ -1421,7 +1421,7 @@ graph LR
 - [ ] Security scan passes with no critical findings
 - [ ] Deployment pipeline can deploy to staging and production
 - [ ] Documentation is complete (README, API docs, deployment runbook)
-```
+````
 
 ### Artifacts Produced
 
@@ -2668,7 +2668,7 @@ We're adding a new feature to the existing plan.
 
 ---
 
-## Dev-Progress Skill: Gap Analysis & Improvements
+### Dev-Progress Skill: Gap Analysis & Improvements
 
 This SOP was designed around the existing `dev-progress`, `devlog-progress`, and `devlog-session-end` skills. During development, several gaps were identified in the current `dev-progress` skill. The table below maps each gap to the SOP's solution.
 
@@ -3002,7 +3002,7 @@ Phase <N> — <Phase Name>
 
 #### C.3 — Architecture Template (`docs/architecture.md`)
 
-```markdown
+````markdown
 # <Project Name> — Architecture
 
 > **Created:** <date>
@@ -3116,11 +3116,11 @@ graph TB
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
 | ... | Low/Med/High | Low/Med/High | ... |
-```
+````
 
 #### C.4 — API Contracts Template (`docs/api-contracts.md`)
 
-```markdown
+````markdown
 # <Project Name> — API Contracts
 
 > **Created:** <date>
@@ -3212,11 +3212,11 @@ Authorization: Bearer <jwt_token>
 
 #### DELETE /api/v1/<resources>/{id}
 ...
-```
+````
 
 #### C.5 — Database Schema Template (`docs/database-schema.md`)
 
-```markdown
+````markdown
 # <Project Name> — Database Schema
 
 > **Created:** <date>
@@ -3302,11 +3302,11 @@ CREATE INDEX idx_resources_created_at ON resources(created_at DESC);
 - Naming: `YYYY_MM_DD_HHMM_description.py`
 - Always include upgrade AND downgrade functions
 - Test migrations against a copy of production data before applying
-```
+````
 
 #### C.6 — MASTER-PLAN Template
 
-```markdown
+````markdown
 # <Project Name> — Master Implementation Plan
 
 > **Generated:** <timestamp>
@@ -3354,7 +3354,7 @@ graph LR
 - [ ] All phases complete with passing tests
 - [ ] All requirements verified
 - [ ] Documentation complete
-```
+````
 
 #### C.7 — PROGRESS Template
 
