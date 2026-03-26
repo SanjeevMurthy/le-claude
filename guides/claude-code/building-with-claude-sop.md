@@ -66,10 +66,10 @@ Every phase produces artifacts that downstream phases consume. This chain is the
 
 | Phase | Produces | Consumed By |
 |-------|----------|-------------|
-| 1 — Ideation | `docs/ideation.md` | Phase 2 |
-| 2 — Requirements | `docs/requirements.md` | Phase 3, 4, 5 |
-| 3 — Architecture | `docs/architecture.md` | Phase 4, 5, 8, 9 |
-| 4 — Detailed Design | `docs/user-flows.md`, `docs/sequence-diagrams.md`, `docs/api-contracts.md`, `docs/database-schema.md`, `docs/frontend-design.md`, `docs/error-handling.md`, `docs/auth-design.md` | Phase 5, 6 |
+| 1 — Ideation | `design-docs/ideation/ideation.md` | Phase 2 |
+| 2 — Requirements | `design-docs/requirements/requirements.md` | Phase 3, 4, 5 |
+| 3 — Architecture | `design-docs/design/architecture.md` | Phase 4, 5, 8, 9 |
+| 4 — Detailed Design | `design-docs/design/user-flows.md`, `design-docs/design/sequence-diagrams.md`, `design-docs/design/api-contracts.md`, `design-docs/design/database-schema.md`, `design-docs/design/frontend-design.md`, `design-docs/design/error-handling.md`, `design-docs/design/auth-design.md` | Phase 5, 6 |
 | 5 — Impl. Planning | `MASTER-PLAN.md`, `PROGRESS.md` | Phase 6, 7, 10 |
 | 6 — Implementation | Source code, tests, updated `PROGRESS.md`, `DEVLOG.md` | Phase 7, 8, 9 |
 | 7 — Testing & QA | Test reports, coverage data, security scan results | Phase 8, 10 |
@@ -77,7 +77,7 @@ Every phase produces artifacts that downstream phases consume. This chain is the
 | 9 — Monitoring | Dashboards, alert rules, runbooks | Phase 10, 11 |
 | 10 — Go-Live | Go-live checklist (completed), post-launch report | Phase 11 |
 | 11 — Maintenance | Bug fixes, patches, dependency updates | Phase 12 |
-| 12 — Feature Additions | Scoped `docs/ideation.md` → re-enters pipeline | Phase 1 |
+| 12 — Feature Additions | Scoped `design-docs/ideation/ideation.md` → re-enters pipeline | Phase 1 |
 
 ### Multi-Repo Workspace Layout
 
@@ -89,17 +89,22 @@ my-project/                      # Parent workspace directory
 ├── MASTER-PLAN.md               # Implementation plan (generated in Phase 5)
 ├── PROGRESS.md                  # Progress tracker (generated in Phase 5)
 ├── DEVLOG.md                    # Session log (auto-updated)
-├── docs/                        # All design artifacts
-│   ├── ideation.md
-│   ├── requirements.md
-│   ├── architecture.md
-│   ├── user-flows.md
-│   ├── sequence-diagrams.md
-│   ├── api-contracts.md
-│   ├── database-schema.md
-│   ├── frontend-design.md
-│   ├── error-handling.md
-│   └── auth-design.md
+├── design-docs/                 # Design documents repo (version-controlled)
+│   ├── .git/
+│   ├── CLAUDE.md                # Repo-specific context
+│   ├── ideation/
+│   │   └── ideation.md          # Phase 1 — problem, users, features
+│   ├── requirements/
+│   │   └── requirements.md      # Phase 2 — user stories, acceptance criteria, NFRs
+│   └── design/
+│       ├── architecture.md      # Phase 3 — system design, component diagrams, TDRs
+│       ├── api-contracts.md     # Phase 4 — OpenAPI 3.0 specification
+│       ├── database-schema.md   # Phase 4 — SQL DDL, ER diagrams, migrations
+│       ├── frontend-design.md   # Phase 4 — component tree, state management
+│       ├── auth-design.md       # Phase 4 — JWT, RBAC, OAuth2 flows
+│       ├── user-flows.md        # Phase 4 — user journey maps
+│       ├── sequence-diagrams.md # Phase 4 — Mermaid interaction diagrams
+│       └── error-handling.md    # Phase 4 — error codes, retry strategy
 ├── frontend/                    # Frontend repo (React/Next.js)
 │   ├── .git/
 │   ├── CLAUDE.md
@@ -122,7 +127,7 @@ Claude Code's context window resets between sessions. Artifacts on disk are your
 
 1. Open Claude Code in the workspace root
 2. Claude reads the root `CLAUDE.md` (which points to design docs, current phase, and plan)
-3. Reference specific artifacts with `@docs/architecture.md` or `@PROGRESS.md`
+3. Reference specific artifacts with `@design-docs/design/architecture.md` or `@PROGRESS.md`
 4. Tell Claude: "We are in Phase 6, implementing Phase 2 tasks. Read `@MASTER-PLAN.md` and `@PROGRESS.md` for context."
 
 **Key rules:**
@@ -240,17 +245,17 @@ When drift is detected (by the verification sub-agent or by manual review):
 # Create the project workspace
 mkdir my-project && cd my-project
 
-# Initialize repos
-mkdir frontend backend infra docs
+# Initialize repos (including design-docs)
+mkdir frontend backend infra
+mkdir -p design-docs/{ideation,requirements,design}
 
-# Init git in each repo
-for dir in frontend backend infra; do
+# Init git in each repo (design-docs is version-controlled like code repos)
+for dir in frontend backend infra design-docs; do
   cd $dir && git init && cd ..
 done
 
 # Create root-level files
 touch CLAUDE.md DEVLOG.md
-mkdir -p docs
 ```
 
 ### CLAUDE.md Template for Multi-Repo Projects
@@ -264,10 +269,10 @@ Create this at the workspace root (`my-project/CLAUDE.md`):
 <1-2 sentences describing the application and its purpose>
 
 ## Workspace structure
+- `design-docs/` — Design documents repo (ideation, requirements, architecture, detailed design)
 - `frontend/` — React/Next.js frontend application
 - `backend/` — Python/FastAPI backend API
 - `infra/` — Kubernetes manifests, Helm charts, CI/CD pipelines
-- `docs/` — All design documents (ideation, requirements, architecture, etc.)
 
 ## Current phase
 Phase <N> — <Phase Name>
@@ -275,17 +280,17 @@ See `MASTER-PLAN.md` for full implementation plan.
 See `PROGRESS.md` for current status.
 
 ## Design documents
-All design artifacts are in `docs/`:
-- `docs/ideation.md` — Problem statement, features, constraints
-- `docs/requirements.md` — User stories, acceptance criteria, NFRs
-- `docs/architecture.md` — System design, component diagrams, tech choices
-- `docs/api-contracts.md` — OpenAPI 3.0 specification
-- `docs/database-schema.md` — SQL DDL, ER diagrams
-- `docs/user-flows.md` — User journey maps
-- `docs/sequence-diagrams.md` — Interaction diagrams (Mermaid)
-- `docs/frontend-design.md` — Component hierarchy, state management
-- `docs/error-handling.md` — Error codes, retry strategies
-- `docs/auth-design.md` — Authentication and authorization design
+All design artifacts are in `design-docs/` (version-controlled repo):
+- `design-docs/ideation/ideation.md` — Problem statement, features, constraints
+- `design-docs/requirements/requirements.md` — User stories, acceptance criteria, NFRs
+- `design-docs/design/architecture.md` — System design, component diagrams, tech choices
+- `design-docs/design/api-contracts.md` — OpenAPI 3.0 specification
+- `design-docs/design/database-schema.md` — SQL DDL, ER diagrams
+- `design-docs/design/user-flows.md` — User journey maps
+- `design-docs/design/sequence-diagrams.md` — Interaction diagrams (Mermaid)
+- `design-docs/design/frontend-design.md` — Component hierarchy, state management
+- `design-docs/design/error-handling.md` — Error codes, retry strategies
+- `design-docs/design/auth-design.md` — Authentication and authorization design
 
 ## Key conventions
 - All documentation is Markdown
@@ -539,7 +544,7 @@ Develop detailed personas for <application>. For each persona:
 
 ### Artifacts Produced
 
-**`docs/ideation.md`** — Contains:
+**`design-docs/ideation/ideation.md`** — Contains:
 
 ```markdown
 # <Project Name> — Ideation
@@ -606,7 +611,7 @@ Transform the ideation document into formal requirements: user stories with acce
 Use parallel sub-agents to cover functional requirements, NFRs, and constraints simultaneously:
 
 ```
-Read @docs/ideation.md carefully.
+Read @design-docs/ideation/ideation.md carefully.
 
 I need you to produce formal requirements. Use three sub-agents in parallel:
 
@@ -640,7 +645,7 @@ After generating requirements, run a verification sub-agent:
 ```
 You are a requirements verification agent.
 
-Read @docs/ideation.md and @docs/requirements.md.
+Read @design-docs/ideation/ideation.md and @design-docs/requirements/requirements.md.
 
 For every Must-have and Should-have feature in the ideation doc:
 1. Find the corresponding user story in requirements.md
@@ -699,7 +704,7 @@ Reliability:
 
 ### Artifacts Produced
 
-**`docs/requirements.md`** — Contains:
+**`design-docs/requirements/requirements.md`** — Contains:
 
 ```markdown
 # <Project Name> — Requirements
@@ -772,7 +777,7 @@ Design the high-level system: component boundaries, technology choices, reposito
 Use the `writing-plans` skill combined with parallel sub-agents for each architectural domain:
 
 ```
-Read @docs/ideation.md and @docs/requirements.md.
+Read @design-docs/ideation/ideation.md and @design-docs/requirements/requirements.md.
 
 We're designing the high-level architecture. Use three sub-agents in parallel:
 
@@ -813,11 +818,11 @@ After the initial architecture is drafted, run a review using two opposing sub-a
 ```
 I need an architecture review using the debate pattern.
 
-**Pro Agent**: Read @docs/architecture.md. Argue why this architecture is
+**Pro Agent**: Read @design-docs/design/architecture.md. Argue why this architecture is
 sound. Identify its strengths, justify the technology choices, and explain
 why the design will scale.
 
-**Devil's Advocate Agent**: Read @docs/architecture.md. Challenge every
+**Devil's Advocate Agent**: Read @design-docs/design/architecture.md. Challenge every
 decision. Identify risks, single points of failure, over-engineering,
 missing concerns, and cheaper alternatives. Be ruthlessly critical.
 
@@ -889,7 +894,7 @@ Technology Decision Record:
 
 ### Artifacts Produced
 
-**`docs/architecture.md`** — Contains:
+**`design-docs/design/architecture.md`** — Contains:
 
 ````markdown
 # <Project Name> — Architecture
@@ -998,7 +1003,7 @@ tmux new -s design
 **Step 2 — Launch Claude with agent teams:**
 
 ```
-Read @docs/requirements.md and @docs/architecture.md.
+Read @design-docs/requirements/requirements.md and @design-docs/design/architecture.md.
 
 We need to produce detailed design documents. Use an agent team with this
 sequencing:
@@ -1006,29 +1011,29 @@ sequencing:
 **Wave 1 (sequential — establishes contracts):**
 1. Database Design Agent — Design the complete database schema from
    requirements. Produce SQL DDL and an ER diagram in Mermaid.
-   Write to docs/database-schema.md.
+   Write to design-docs/design/database-schema.md.
 
 **Wave 2 (parallel — builds on database schema):**
 2. API Design Agent — Read the database schema. Design all API endpoints
    following OpenAPI 3.0. Include request/response schemas, error responses,
-   authentication requirements. Write to docs/api-contracts.md.
+   authentication requirements. Write to design-docs/design/api-contracts.md.
 3. Auth Design Agent — Design the authentication and authorization system.
    JWT structure, RBAC model, session management, OAuth2 flows if applicable.
-   Write to docs/auth-design.md.
+   Write to design-docs/design/auth-design.md.
 
 **Wave 3 (parallel — builds on API contracts):**
 4. Frontend Design Agent — Read the API contracts. Design the component
    hierarchy, page layouts, state management, and data fetching strategy.
-   Write to docs/frontend-design.md.
+   Write to design-docs/design/frontend-design.md.
 5. User Flow Agent — Map every user journey from login to task completion.
-   Include happy paths and error paths. Write to docs/user-flows.md.
+   Include happy paths and error paths. Write to design-docs/design/user-flows.md.
 6. Sequence Diagram Agent — For every API endpoint, create a sequence
-   diagram showing the full request lifecycle. Write to docs/sequence-diagrams.md.
+   diagram showing the full request lifecycle. Write to design-docs/design/sequence-diagrams.md.
 
 **Wave 4 (parallel — cross-cutting):**
 7. Error Handling Agent — Define the error handling strategy across all layers.
    Error codes, retry policies, circuit breakers, user-facing messages.
-   Write to docs/error-handling.md.
+   Write to design-docs/design/error-handling.md.
 ```
 
 ### Consolidated Design Review
@@ -1036,7 +1041,7 @@ sequencing:
 After all design documents are produced, run a review with three sub-agents:
 
 ```
-I have 7 design documents in docs/. Run three review sub-agents in parallel:
+I have 7 design documents in design-docs/design/. Run three review sub-agents in parallel:
 
 1. **Consistency Reviewer**: Check that all documents use consistent naming,
    data types, and identifiers. The database schema field names should match
@@ -1066,8 +1071,8 @@ I have 7 design documents in docs/. Run three review sub-agents in parallel:
 ```
 Design the complete database schema for <application>.
 
-Read @docs/requirements.md for all data entities.
-Read @docs/architecture.md for database technology choice (PostgreSQL).
+Read @design-docs/requirements/requirements.md for all data entities.
+Read @design-docs/design/architecture.md for database technology choice (PostgreSQL).
 
 For each table:
 1. Table name (snake_case, plural)
@@ -1095,9 +1100,9 @@ Use these PostgreSQL conventions:
 ````
 Design the complete API contract for <application>.
 
-Read @docs/database-schema.md for the data model.
-Read @docs/requirements.md for all user stories.
-Read @docs/auth-design.md for authentication requirements.
+Read @design-docs/design/database-schema.md for the data model.
+Read @design-docs/requirements/requirements.md for all user stories.
+Read @design-docs/design/auth-design.md for authentication requirements.
 
 For each endpoint:
 1. HTTP method and path (RESTful conventions)
@@ -1141,9 +1146,9 @@ paths:
 ````
 Create sequence diagrams for these API flows:
 
-Read @docs/api-contracts.md for endpoint definitions.
-Read @docs/auth-design.md for authentication flow.
-Read @docs/database-schema.md for data layer.
+Read @design-docs/design/api-contracts.md for endpoint definitions.
+Read @design-docs/design/auth-design.md for authentication flow.
+Read @design-docs/design/database-schema.md for data layer.
 
 For each major user action, create a Mermaid sequence diagram showing:
 1. User/Browser → Frontend
@@ -1181,9 +1186,9 @@ sequenceDiagram
 ````
 Design the frontend component hierarchy for <application>.
 
-Read @docs/api-contracts.md for all data shapes.
-Read @docs/user-flows.md for all user journeys.
-Read @docs/auth-design.md for client-side auth requirements.
+Read @design-docs/design/api-contracts.md for all data shapes.
+Read @design-docs/design/user-flows.md for all user journeys.
+Read @design-docs/design/auth-design.md for client-side auth requirements.
 
 Produce:
 1. **Page structure**: All routes/pages with their URL patterns
@@ -1220,8 +1225,8 @@ app/
 ```
 Design the error handling strategy for <application>.
 
-Read @docs/api-contracts.md for API error responses.
-Read @docs/architecture.md for the system topology.
+Read @design-docs/design/api-contracts.md for API error responses.
+Read @design-docs/design/architecture.md for the system topology.
 
 Define:
 
@@ -1251,7 +1256,7 @@ Define:
 
 ### Artifacts Produced
 
-This phase produces 7 documents in `docs/`:
+This phase produces 7 documents in `design-docs/design/`:
 
 | Document | Contents | Approximate Size |
 |----------|----------|-----------------|
@@ -1288,15 +1293,15 @@ Break the detailed design into implementation phases (waves), each independently
 
 ```
 Read all design documents:
-- @docs/requirements.md
-- @docs/architecture.md
-- @docs/database-schema.md
-- @docs/api-contracts.md
-- @docs/auth-design.md
-- @docs/frontend-design.md
-- @docs/user-flows.md
-- @docs/sequence-diagrams.md
-- @docs/error-handling.md
+- @design-docs/requirements/requirements.md
+- @design-docs/design/architecture.md
+- @design-docs/design/database-schema.md
+- @design-docs/design/api-contracts.md
+- @design-docs/design/auth-design.md
+- @design-docs/design/frontend-design.md
+- @design-docs/design/user-flows.md
+- @design-docs/design/sequence-diagrams.md
+- @design-docs/design/error-handling.md
 
 Create a phased implementation plan. Use this strategy:
 
@@ -1353,7 +1358,7 @@ The MASTER-PLAN.md is approved. Now:
 > **Generated:** <timestamp>
 > **Status:** APPROVED
 > **Fingerprint:** `sha256:<hash>`
-> **Design docs:** docs/requirements.md, docs/architecture.md, + 7 design docs
+> **Design docs:** design-docs/requirements/, design-docs/design/ (architecture + 7 detailed design docs)
 
 ## Overview
 <1-2 paragraphs describing the implementation approach>
@@ -1384,22 +1389,22 @@ graph LR
 ### Tasks
 
 - [ ] **MP-1.1** Initialize Next.js project with TypeScript, TailwindCSS, ESLint
-  - Design ref: docs/architecture.md § Frontend
+  - Design ref: design-docs/design/architecture.md § Frontend
   - Target: `frontend/`
   - Complexity: S
 
 - [ ] **MP-1.2** Initialize FastAPI project with SQLAlchemy, Alembic, pytest
-  - Design ref: docs/architecture.md § Backend
+  - Design ref: design-docs/design/architecture.md § Backend
   - Target: `backend/`
   - Complexity: S
 
 - [ ] **MP-1.3** Create Docker Compose for local development (PostgreSQL, Redis)
-  - Design ref: docs/architecture.md § Infrastructure
+  - Design ref: design-docs/design/architecture.md § Infrastructure
   - Target: `infra/docker-compose.dev.yml`
   - Complexity: S
 
 - [ ] **MP-1.4** Set up CI pipeline skeleton (lint, test, build for each repo)
-  - Design ref: docs/architecture.md § CI/CD
+  - Design ref: design-docs/design/architecture.md § CI/CD
   - Target: `.github/workflows/` in each repo
   - Complexity: M
 
@@ -1502,9 +1507,9 @@ We are implementing Phase <N> — <Phase Name> of <Project Name>.
 Read these files for context:
 - @MASTER-PLAN.md (focus on Phase <N> tasks)
 - @PROGRESS.md (current status)
-- @docs/api-contracts.md (if this phase involves API work)
-- @docs/database-schema.md (if this phase involves data work)
-- @docs/frontend-design.md (if this phase involves frontend work)
+- @design-docs/design/api-contracts.md (if this phase involves API work)
+- @design-docs/design/database-schema.md (if this phase involves data work)
+- @design-docs/design/frontend-design.md (if this phase involves frontend work)
 
 The plan fingerprint should have been verified by the SessionStart hook.
 If you see a warning about plan changes, stop and tell me.
@@ -1636,7 +1641,7 @@ Identify independent tracks:
 - Track C: MP-N.6, MP-N.7 (frontend components — depends on Track B)
 
 For Track A, use a sub-agent:
-"Implement MP-N.1 through MP-N.3. Read @docs/database-schema.md for specs.
+"Implement MP-N.1 through MP-N.3. Read @design-docs/design/database-schema.md for specs.
 Write migrations, create ORM models, add seed data. Run tests after each task.
 Report: files created, tests written, test results."
 
@@ -1660,14 +1665,14 @@ We're implementing Phase <N> across multiple repos. Create an agent team:
 
 **Agent 1 — Backend Developer** (worktree: backend/)
 - Implement MP-N.1 through MP-N.4 (API endpoints)
-- Read @docs/api-contracts.md for specifications
+- Read @design-docs/design/api-contracts.md for specifications
 - Write tests for every endpoint
 - Commit when tests pass
 
 **Agent 2 — Frontend Developer** (worktree: frontend/)
 - Implement MP-N.5 through MP-N.8 (UI components)
-- Read @docs/frontend-design.md for specifications
-- Read @docs/api-contracts.md for API shapes
+- Read @design-docs/design/frontend-design.md for specifications
+- Read @design-docs/design/api-contracts.md for API shapes
 - Write tests for every component
 - Commit when tests pass
 
@@ -1687,7 +1692,7 @@ When implementing features, use the `test-driven-development` skill:
 
 Implement MP-<N>.<M>: <task description>
 
-Design reference: @docs/<relevant-doc>.md § <section>
+Design reference: @design-docs/design/<relevant-doc>.md § <section>
 
 Follow TDD:
 1. Write failing test(s) that describe the expected behavior
@@ -1783,7 +1788,7 @@ If the verification sub-agent detects drift:
 | Test code | `*/tests/`, `*.test.*` | Implementation |
 | PROGRESS.md | Workspace root | After each task (with evidence) |
 | DEVLOG.md | Workspace root | After each session (/session-end) |
-| Drift reports | `docs/drift-reports/` | When drift detected |
+| Drift reports | `design-docs/drift-reports/` | When drift detected |
 | Verification reports | Inline in conversation | End of each phase |
 
 ### Exit Criteria (per phase)
@@ -1811,9 +1816,9 @@ Use agent teams for parallel test generation across testing types:
 ```
 All implementation phases are complete. We need comprehensive testing.
 
-Read @MASTER-PLAN.md and @docs/requirements.md for what was built.
-Read @docs/user-flows.md for end-to-end scenarios.
-Read @docs/api-contracts.md for API testing.
+Read @MASTER-PLAN.md and @design-docs/requirements/requirements.md for what was built.
+Read @design-docs/design/user-flows.md for end-to-end scenarios.
+Read @design-docs/design/api-contracts.md for API testing.
 
 Use parallel sub-agents for each testing type:
 
@@ -1825,7 +1830,7 @@ Use parallel sub-agents for each testing type:
    Target: backend/tests/integration/
 
 2. **E2E Test Agent**: Write Playwright E2E tests for every user flow
-   in docs/user-flows.md:
+   in design-docs/design/user-flows.md:
    - Happy path for each user journey
    - Error paths (invalid input, unauthorized access)
    - Cross-browser testing (Chrome, Firefox, Safari)
@@ -1872,8 +1877,8 @@ For each page, verify:
 ```
 Write integration tests for the <feature> workflow.
 
-Read @docs/sequence-diagrams.md for the expected interaction flow.
-Read @docs/api-contracts.md for request/response shapes.
+Read @design-docs/design/sequence-diagrams.md for the expected interaction flow.
+Read @design-docs/design/api-contracts.md for request/response shapes.
 
 Test this end-to-end flow:
 1. Create test data (user account, seed data)
@@ -1891,7 +1896,7 @@ Use a test database (Docker PostgreSQL container).
 
 ```
 Write Playwright E2E tests for the user flow: "<flow name>"
-from @docs/user-flows.md.
+from @design-docs/design/user-flows.md.
 
 Test steps:
 1. Navigate to the starting page
@@ -1913,8 +1918,8 @@ Use Page Object Model pattern for maintainability.
 ```
 Write k6 performance tests for the API:
 
-Read @docs/api-contracts.md for endpoints.
-Read @docs/requirements.md § NFR-01 for performance targets.
+Read @design-docs/design/api-contracts.md for endpoints.
+Read @design-docs/requirements/requirements.md § NFR-01 for performance targets.
 
 Test scenarios:
 1. **Smoke test**: 1 user, verify endpoints respond correctly
@@ -1942,7 +1947,7 @@ Thresholds (from NFR-01):
 ### Exit Criteria
 
 - [ ] Integration tests pass for all cross-component workflows
-- [ ] E2E tests pass for every user flow in docs/user-flows.md
+- [ ] E2E tests pass for every user flow in design-docs/design/user-flows.md
 - [ ] Performance tests meet NFR targets (response times, throughput)
 - [ ] Security scan shows no critical or high vulnerabilities
 - [ ] Code coverage meets target (e.g., 80%+ for backend, 70%+ for frontend)
@@ -1960,8 +1965,8 @@ Containerize the application, create Helm charts, set up CI/CD pipelines, and de
 ### How to Configure Claude
 
 ```
-Read @docs/architecture.md § Kubernetes Topology for the target deployment.
-Read @docs/requirements.md § NFR-04 for reliability requirements.
+Read @design-docs/design/architecture.md § Kubernetes Topology for the target deployment.
+Read @design-docs/requirements/requirements.md § NFR-04 for reliability requirements.
 
 We need to set up deployment infrastructure:
 
@@ -2150,8 +2155,8 @@ Set up the observability stack: structured logging, Prometheus metrics, Grafana 
 ### How to Configure Claude
 
 ```
-Read @docs/architecture.md § Logging & Monitoring for the monitoring strategy.
-Read @docs/requirements.md § NFR-04 for reliability targets (uptime, RTO, RPO).
+Read @design-docs/design/architecture.md § Logging & Monitoring for the monitoring strategy.
+Read @design-docs/requirements/requirements.md § NFR-04 for reliability targets (uptime, RTO, RPO).
 
 Set up the observability stack:
 
@@ -2308,8 +2313,8 @@ Execute the go-live process: final checklist verification, DNS cutover, SSL vali
 Generate a go-live checklist from our design and deployment documents.
 
 Read:
-- @docs/requirements.md (functional and NFRs)
-- @docs/architecture.md (infrastructure topology)
+- @design-docs/requirements/requirements.md (functional and NFRs)
+- @design-docs/design/architecture.md (infrastructure topology)
 - @MASTER-PLAN.md (all phases)
 - @PROGRESS.md (completion status)
 - @infra/docs/deployment-runbook.md (deployment steps)
@@ -2591,10 +2596,10 @@ We want to add a new feature: <feature description>
 Before designing anything, analyze the impact on the existing system:
 
 1. Read the current design documents:
-   - @docs/architecture.md
-   - @docs/database-schema.md
-   - @docs/api-contracts.md
-   - @docs/frontend-design.md
+   - @design-docs/design/architecture.md
+   - @design-docs/design/database-schema.md
+   - @design-docs/design/api-contracts.md
+   - @design-docs/design/frontend-design.md
 
 2. For the proposed feature, identify:
    - Which existing components are affected?
@@ -2706,10 +2711,10 @@ To bring the `dev-progress` skill in line with this SOP, consider these updates:
 <1-2 sentences: what this application does and who it's for>
 
 ## Workspace structure
+- `design-docs/` — Design documents repo (ideation, requirements, architecture, detailed design)
 - `frontend/` — Next.js frontend (React, TailwindCSS, TypeScript)
 - `backend/` — FastAPI backend (Python, SQLAlchemy, Alembic)
 - `infra/` — Kubernetes manifests, Helm charts, CI/CD, monitoring
-- `docs/` — Design documents (ideation → architecture → detailed design)
 
 ## Current phase
 Phase <N> — <Phase Name>
@@ -2718,16 +2723,17 @@ Phase <N> — <Phase Name>
 - Session log: `DEVLOG.md`
 
 ## Design documents
-- `docs/ideation.md` — Problem, users, features (MoSCoW)
-- `docs/requirements.md` — User stories, acceptance criteria, NFRs
-- `docs/architecture.md` — System design, component diagram, TDRs
-- `docs/api-contracts.md` — OpenAPI 3.0 spec
-- `docs/database-schema.md` — SQL DDL, ER diagram, migrations
-- `docs/user-flows.md` — User journey maps
-- `docs/sequence-diagrams.md` — Mermaid interaction diagrams
-- `docs/frontend-design.md` — Component tree, state, data fetching
-- `docs/error-handling.md` — Error codes, retry strategy
-- `docs/auth-design.md` — JWT, RBAC, OAuth2
+All design artifacts are in `design-docs/` (version-controlled repo):
+- `design-docs/ideation/ideation.md` — Problem, users, features (MoSCoW)
+- `design-docs/requirements/requirements.md` — User stories, acceptance criteria, NFRs
+- `design-docs/design/architecture.md` — System design, component diagram, TDRs
+- `design-docs/design/api-contracts.md` — OpenAPI 3.0 spec
+- `design-docs/design/database-schema.md` — SQL DDL, ER diagram, migrations
+- `design-docs/design/user-flows.md` — User journey maps
+- `design-docs/design/sequence-diagrams.md` — Mermaid interaction diagrams
+- `design-docs/design/frontend-design.md` — Component tree, state, data fetching
+- `design-docs/design/error-handling.md` — Error codes, retry strategy
+- `design-docs/design/auth-design.md` — JWT, RBAC, OAuth2
 
 ## Key conventions
 - Markdown for all documentation
@@ -2869,7 +2875,7 @@ Phase <N> — <Phase Name>
 
 ### Appendix C: Artifact Templates
 
-#### C.1 — Ideation Template (`docs/ideation.md`)
+#### C.1 — Ideation Template (`design-docs/ideation/ideation.md`)
 
 ```markdown
 # <Project Name> — Ideation
@@ -2927,13 +2933,13 @@ Phase <N> — <Phase Name>
 1. <question that needs answering before design>
 ```
 
-#### C.2 — Requirements Template (`docs/requirements.md`)
+#### C.2 — Requirements Template (`design-docs/requirements/requirements.md`)
 
 ```markdown
 # <Project Name> — Requirements
 
 > **Created:** <date>
-> **Source:** docs/ideation.md
+> **Source:** design-docs/ideation/ideation.md
 > **Status:** Draft | Reviewed | Approved
 
 ## Functional Requirements
@@ -3000,13 +3006,13 @@ Phase <N> — <Phase Name>
 | F-02 | ... | FR-02, FR-03 | Full |
 ```
 
-#### C.3 — Architecture Template (`docs/architecture.md`)
+#### C.3 — Architecture Template (`design-docs/design/architecture.md`)
 
 ````markdown
 # <Project Name> — Architecture
 
 > **Created:** <date>
-> **Source:** docs/requirements.md
+> **Source:** design-docs/requirements/requirements.md
 > **Status:** Draft | Reviewed | Approved
 
 ## System Overview
@@ -3118,13 +3124,13 @@ graph TB
 | ... | Low/Med/High | Low/Med/High | ... |
 ````
 
-#### C.4 — API Contracts Template (`docs/api-contracts.md`)
+#### C.4 — API Contracts Template (`design-docs/design/api-contracts.md`)
 
 ````markdown
 # <Project Name> — API Contracts
 
 > **Created:** <date>
-> **Source:** docs/requirements.md, docs/database-schema.md
+> **Source:** design-docs/requirements/requirements.md, design-docs/design/database-schema.md
 > **Format:** OpenAPI 3.0.3
 
 ## Base URL
@@ -3214,13 +3220,13 @@ Authorization: Bearer <jwt_token>
 ...
 ````
 
-#### C.5 — Database Schema Template (`docs/database-schema.md`)
+#### C.5 — Database Schema Template (`design-docs/design/database-schema.md`)
 
 ````markdown
 # <Project Name> — Database Schema
 
 > **Created:** <date>
-> **Source:** docs/requirements.md
+> **Source:** design-docs/requirements/requirements.md
 > **Database:** PostgreSQL 15+
 
 ## ER Diagram
@@ -3312,7 +3318,7 @@ CREATE INDEX idx_resources_created_at ON resources(created_at DESC);
 > **Generated:** <timestamp>
 > **Status:** DRAFT | APPROVED
 > **Fingerprint:** `sha256:<hash>`
-> **Design docs:** docs/requirements.md, docs/architecture.md, + N design docs
+> **Design docs:** design-docs/requirements/, design-docs/design/ (architecture + N detailed design docs)
 
 ## Overview
 <1-2 paragraphs: implementation approach and strategy>
@@ -3684,7 +3690,7 @@ All prompt templates indexed by phase. Each prompt is designed to be used direct
    - Database schema finalized first
    - API contracts generated from schema
    - Frontend built against API contracts
-2. Store API contracts in `docs/api-contracts.md` (shared, not in any single repo)
+2. Store API contracts in `design-docs/design/api-contracts.md` (shared, not in any single repo)
 3. When updating an API, update the contract document first, then both repos
 
 ---
